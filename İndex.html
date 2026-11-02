@@ -10,6 +10,9 @@
     <meta name="apple-mobile-web-app-title" content="Rojin & Ferhat">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Her cihazda %100 çalışan standart Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -18,6 +21,7 @@
             background-size: 20px 20px;
             color: #4a3f3a;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
         .handwriting {
             font-family: 'Caveat', cursive;
@@ -30,9 +34,8 @@
             position: relative;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
-        .polaroid:hover {
-            transform: translateY(-4px) rotate(0deg) !important;
-            box-shadow: 0 18px 30px -5px rgba(74, 63, 58, 0.18);
+        .polaroid:active {
+            transform: scale(0.98) !important;
         }
         .tape {
             position: absolute;
@@ -67,25 +70,22 @@
 <body class="min-h-screen pb-28">
 
     <!-- Üst Bilgi & Müzik Çalar Barı -->
-    <div class="sticky top-0 z-30 bg-[#fdf8f5]/90 backdrop-blur-md border-b border-[#ece0d8] px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-            <span id="cloudBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                Bulut Bekleniyor
-            </span>
-        </div>
+    <div class="sticky top-0 z-30 bg-[#fdf8f5]/95 backdrop-blur-md border-b border-[#ece0d8] px-4 py-3 flex items-center justify-between">
+        <button type="button" onclick="showCloudStatus()" id="cloudBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 shadow-sm active:scale-95 transition">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <span>Bağlanıyor...</span>
+        </button>
 
-        <!-- Chill Melodi Plak Çalar -->
         <div class="flex items-center gap-2">
-            <button id="musicToggleBtn" onclick="toggleMusic()" class="flex items-center gap-2 bg-white border border-[#e5d5cc] px-3 py-1.5 rounded-full shadow-sm text-xs font-semibold text-[#6e5a50] hover:bg-[#faf2ed] transition">
+            <button type="button" id="musicToggleBtn" onclick="toggleMusic()" class="flex items-center gap-2 bg-white border border-[#e5d5cc] px-3 py-1.5 rounded-full shadow-sm text-xs font-semibold text-[#6e5a50] active:scale-95 transition">
                 <span id="vinylIcon" class="inline-block text-base">💿</span>
                 <span id="musicText">Chill Melodi ♪</span>
             </button>
-            <label for="customAudioInput" title="Kendi Şarkınızı Seçin" class="cursor-pointer bg-white border border-[#e5d5cc] p-1.5 rounded-full shadow-sm text-xs hover:bg-[#faf2ed]">
+            <label for="customAudioInput" class="cursor-pointer bg-white border border-[#e5d5cc] p-1.5 rounded-full shadow-sm text-xs active:scale-95 transition">
                 🎵
                 <input type="file" id="customAudioInput" accept="audio/*" class="hidden" onchange="loadCustomAudio(event)">
             </label>
-            <audio id="bgMusic" loop preload="auto">
+            <audio id="bgMusic" loop preload="none">
                 <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
             </audio>
         </div>
@@ -102,13 +102,13 @@
         <p class="text-xs text-[#9c857a] mt-1">Birlikte biriktirdiğimiz en güzel anlar</p>
     </header>
 
-    <!-- Üst Şehir Sekmeleri (İzmir & Diyarbakır) -->
+    <!-- Üst Şehir Sekmeleri -->
     <div class="max-w-md mx-auto px-4 mt-2">
         <div class="grid grid-cols-2 gap-3 bg-[#efe4dc] p-1.5 rounded-2xl shadow-inner">
-            <button onclick="selectCity('izmir')" id="city-izmir" class="city-btn py-2.5 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 bg-white text-[#5c4338] shadow-sm">
+            <button type="button" onclick="selectCity('izmir')" id="city-izmir" class="city-btn py-2.5 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 bg-white text-[#5c4338] shadow-sm">
                 <span>🌊</span> İzmir
             </button>
-            <button onclick="selectCity('diyarbakir')" id="city-diyarbakir" class="city-btn py-2.5 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 text-[#7d685e] hover:text-[#5c4338]">
+            <button type="button" onclick="selectCity('diyarbakir')" id="city-diyarbakir" class="city-btn py-2.5 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 text-[#7d685e]">
                 <span>🏰</span> Diyarbakır
             </button>
         </div>
@@ -117,31 +117,31 @@
     <!-- Alt Kategori Sekmeleri -->
     <div class="max-w-2xl mx-auto mt-4 px-4">
         <div class="flex items-center gap-2 overflow-x-auto hide-scroll py-2" id="categoryTabs">
-            <button onclick="selectCategory('yemek')" data-cat="yemek" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-[#5c4338] text-white shadow-sm">
+            <button type="button" onclick="selectCategory('yemek')" data-cat="yemek" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-[#5c4338] text-white shadow-sm">
                 🍝 Yemek
             </button>
-            <button onclick="selectCategory('sarilma')" data-cat="sarilma" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
+            <button type="button" onclick="selectCategory('sarilma')" data-cat="sarilma" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
                 🫂 Sarılma
             </button>
-            <button onclick="selectCategory('gezi')" data-cat="gezi" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
+            <button type="button" onclick="selectCategory('gezi')" data-cat="gezi" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
                 ✈️ Gezi
             </button>
-            <button onclick="selectCategory('normal')" data-cat="normal" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
+            <button type="button" onclick="selectCategory('normal')" data-cat="normal" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
                 📸 Normal Foto
             </button>
-            <button onclick="selectCategory('only_rojin')" data-cat="only_rojin" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
+            <button type="button" onclick="selectCategory('only_rojin')" data-cat="only_rojin" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
                 🌸 Only Rojin
             </button>
-            <button onclick="selectCategory('only_ferhat')" data-cat="only_ferhat" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
+            <button type="button" onclick="selectCategory('only_ferhat')" data-cat="only_ferhat" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
                 ⚡ Only Ferhat
             </button>
-            <button onclick="selectCategory('video')" data-cat="video" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
+            <button type="button" onclick="selectCategory('video')" data-cat="video" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
                 🎥 Video
             </button>
-            <button onclick="selectCategory('ekip')" data-cat="ekip" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
+            <button type="button" onclick="selectCategory('ekip')" data-cat="ekip" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
                 🎉 Ekip
             </button>
-            <button onclick="selectCategory('gizli')" data-cat="gizli" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
+            <button type="button" onclick="selectCategory('gizli')" data-cat="gizli" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]">
                 🙈
             </button>
         </div>
@@ -164,7 +164,7 @@
 
     <!-- Alt Sabit (+) Anı Yükle Butonu -->
     <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
-        <button onclick="openUploadModal()" class="flex items-center gap-2 bg-[#5c4338] hover:bg-[#463229] text-white font-semibold px-6 py-3.5 rounded-full shadow-xl transition transform active:scale-95">
+        <button type="button" onclick="openUploadModal()" class="flex items-center gap-2 bg-[#5c4338] active:bg-[#463229] text-white font-semibold px-6 py-3.5 rounded-full shadow-xl transition transform active:scale-95">
             <span class="text-xl leading-none">+</span>
             <span>Anı Yükle</span>
         </button>
@@ -175,18 +175,18 @@
         <div class="bg-[#fdf8f5] border border-[#e5d5cc] rounded-3xl max-w-md w-full p-6 shadow-2xl">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="handwriting text-3xl text-[#5c4338] font-bold">Yeni Anı Ekle ✨</h3>
-                <button onclick="closeUploadModal()" class="text-[#9c857a] hover:text-[#5c4338] text-xl font-bold">✕</button>
+                <button type="button" onclick="closeUploadModal()" class="text-[#9c857a] text-xl font-bold px-2">✕</button>
             </div>
 
             <form id="uploadForm" onsubmit="saveMemory(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-[#6e5a50] mb-1">Fotoğraf veya Video Seç</label>
-                    <input type="file" id="mediaInput" accept="image/*,video/*" required class="w-full text-xs text-[#6e5a50] file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#efe4dc] file:text-[#5c4338] hover:file:bg-[#e5d5cc]">
+                    <input type="file" id="mediaInput" accept="image/*,video/*" required class="w-full text-xs text-[#6e5a50] file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#efe4dc] file:text-[#5c4338]">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-[#6e5a50] mb-1">Anı Başlığı / Notunuz</label>
-                    <input type="text" id="titleInput" placeholder="Örn: İlk kahvemiz..." required class="w-full px-3.5 py-2.5 rounded-xl border border-[#decbc0] bg-white text-sm focus:outline-none focus:border-[#8c6756]">
+                    <input type="text" id="titleInput" placeholder="Örn: İlk kahvemiz..." required class="w-full px-3.5 py-2.5 rounded-xl border border-[#decbc0] bg-white text-sm focus:outline-none">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -218,7 +218,7 @@
                     <input type="date" id="dateInput" required class="w-full px-3.5 py-2 rounded-xl border border-[#decbc0] bg-white text-sm focus:outline-none">
                 </div>
 
-                <button type="submit" id="submitMemoryBtn" class="w-full bg-[#5c4338] hover:bg-[#463229] text-white font-semibold py-3 rounded-xl shadow-md transition">
+                <button type="submit" id="submitMemoryBtn" class="w-full bg-[#5c4338] active:bg-[#463229] text-white font-semibold py-3 rounded-xl shadow-md transition">
                     Kutuya Kaydet 💝
                 </button>
             </form>
@@ -231,11 +231,11 @@
             <div class="text-4xl mb-2">🙈</div>
             <h3 class="handwriting text-3xl text-[#5c4338] font-bold mb-1">Özel Bölüm</h3>
             <p class="text-xs text-[#8c7468] mb-4">Bu kategoriyi görmek için şifreyi girin</p>
-            <input type="password" id="secretPassInput" inputmode="numeric" placeholder="••••" class="w-full text-center tracking-widest text-lg font-bold px-4 py-2.5 rounded-xl border border-[#decbc0] bg-white mb-2 focus:outline-none focus:border-[#5c4338]">
+            <input type="password" id="secretPassInput" inputmode="numeric" placeholder="••••" class="w-full text-center tracking-widest text-lg font-bold px-4 py-2.5 rounded-xl border border-[#decbc0] bg-white mb-2 focus:outline-none">
             <p id="passError" class="text-xs text-red-600 mb-3 hidden">Şifre yanlış, tekrar dene!</p>
             <div class="flex gap-2">
-                <button onclick="closePasswordModal()" class="flex-1 py-2.5 rounded-xl border border-[#decbc0] text-xs font-semibold text-[#6e5a50]">İptal</button>
-                <button onclick="verifySecretPassword()" class="flex-1 py-2.5 rounded-xl bg-[#5c4338] text-white text-xs font-semibold">Aç 🔓</button>
+                <button type="button" onclick="closePasswordModal()" class="flex-1 py-2.5 rounded-xl border border-[#decbc0] text-xs font-semibold text-[#6e5a50]">İptal</button>
+                <button type="button" onclick="verifySecretPassword()" class="flex-1 py-2.5 rounded-xl bg-[#5c4338] text-white text-xs font-semibold">Aç 🔓</button>
             </div>
         </div>
     </div>
@@ -249,40 +249,28 @@
                     <h4 id="lightboxTitle" class="handwriting text-2xl text-[#5c4338] font-bold"></h4>
                     <p id="lightboxDate" class="text-xs text-[#8c7468]"></p>
                 </div>
-                <button onclick="closeLightbox()" class="px-4 py-1.5 bg-[#efe4dc] text-[#5c4338] rounded-lg text-xs font-semibold">Kapat</button>
+                <button type="button" onclick="closeLightbox()" class="px-4 py-1.5 bg-[#efe4dc] text-[#5c4338] rounded-lg text-xs font-semibold">Kapat</button>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK ve Entegre Edilmiş Bilgiler -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    <!-- Tüm Butonları ve Bulutu Çalıştıran Ana Script -->
+    <script>
+        var SECRET_PIN = "2130";
+        var currentCity = "izmir";
+        var currentCategory = "yemek";
+        var isSecretUnlocked = false;
+        var memories = [];
+        var db = null;
+        var isCloudActive = false;
+        var lastCloudError = "";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyC5g-LIo2zo1vQZf9yFwPpOA6h6BtTyGik",
-            authDomain: "rojhat-cdcc8.firebaseapp.com",
-            projectId: "rojhat-cdcc8",
-            storageBucket: "rojhat-cdcc8.firebasestorage.app",
-            messagingSenderId: "53049050914",
-            appId: "1:53049050914:web:b6b2bc7c5511ee6ff2077b"
-        };
-
-        const SECRET_PIN = "2130";
-
-        let db = null;
-        let isCloudActive = false;
-        let memories = [];
-        let currentCity = "izmir";
-        let currentCategory = "yemek";
-        let isSecretUnlocked = false;
-
-        const cityNames = {
+        var cityNames = {
             izmir: "İzmir",
             diyarbakir: "Diyarbakır"
         };
 
-        const categoryNames = {
+        var categoryNames = {
             yemek: "Yemek Anılarımız",
             sarilma: "Sarılma Anlarımız",
             gezi: "Gezi Rehberimiz",
@@ -294,27 +282,80 @@
             gizli: "🙈 Özel Anlarımız"
         };
 
-        try {
-            if (firebaseConfig.apiKey) {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                isCloudActive = true;
-
-                const badge = document.getElementById("cloudBadge");
-                badge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800";
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> ☁️ Rojin & Ferhat Bulut Aktif`;
-
-                const q = query(collection(db, "rojin_ferhat_anilar"), orderBy("createdAt", "desc"));
-                onSnapshot(q, (snapshot) => {
-                    memories = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Önce yerel yedekleri yükle ki ekran hemen açılsın
+        function loadLocalBackup() {
+            try {
+                var saved = localStorage.getItem("rojin_ferhat_backup");
+                if (saved) {
+                    memories = JSON.parse(saved);
                     renderMemories();
-                });
-            }
-        } catch (err) {
-            console.warn("Bağlantı hatası:", err);
+                }
+            } catch (e) {}
         }
 
-        window.selectCity = function(city) {
+        loadLocalBackup();
+
+        // Firebase Başlatma
+        var firebaseConfig = {
+            apiKey: "AIzaSyC5g-LIo2zo1vQZf9yFwPpOA6h6BtTyGik",
+            authDomain: "rojhat-cdcc8.firebaseapp.com",
+            projectId: "rojhat-cdcc8",
+            storageBucket: "rojhat-cdcc8.firebasestorage.app",
+            messagingSenderId: "53049050914",
+            appId: "1:53049050914:web:b6b2bc7c5511ee6ff2077b"
+        };
+
+        function initCloud() {
+            var badge = document.getElementById("cloudBadge");
+            try {
+                if (typeof firebase === "undefined") {
+                    throw new Error("Firebase kütüphanesi yüklenemedi.");
+                }
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                db = firebase.firestore();
+
+                db.collection("rojin_ferhat_anilar").orderBy("createdAt", "desc").onSnapshot(function(snapshot) {
+                    isCloudActive = true;
+                    lastCloudError = "";
+                    badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 shadow-sm";
+                    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>☁️ Ortak Bulut Aktif</span>';
+
+                    memories = snapshot.docs.map(function(doc) {
+                        var data = doc.data();
+                        data.id = doc.id;
+                        return data;
+                    });
+                    try {
+                        localStorage.setItem("rojin_ferhat_backup", JSON.stringify(memories));
+                    } catch (e) {}
+                    renderMemories();
+                }, function(err) {
+                    isCloudActive = false;
+                    lastCloudError = err.message || "Firestore izin veya kurulum hatası.";
+                    badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 shadow-sm";
+                    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span><span>⚠️ Bulut Ayarı Gerekli (Dokun)</span>';
+                });
+            } catch (err) {
+                isCloudActive = false;
+                lastCloudError = err.message;
+                badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 shadow-sm";
+                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>📱 Cihaz Hafızası Aktif</span>';
+            }
+        }
+
+        window.addEventListener("load", initCloud);
+
+        function showCloudStatus() {
+            if (isCloudActive) {
+                alert("✅ Rojin & Ferhat ortak bulutu (rojhat-cdcc8) sorunsuz çalışıyor! Yüklediğiniz her anı iki telefonda da anında görünür.");
+            } else {
+                alert("⚠️ Bulut bağlantısı şu an beklemede.\n\nNedeni: Firebase panelinde (rojhat-cdcc8 projesi içinde) sol menüden 'Firestore Database' kısmına girip 'Create database -> Start in test mode' seçeneğini henüz açmamış olabilirsiniz.\n\nTeknik Detay: " + (lastCloudError || "Bağlantı bekleniyor") + "\n\nMerak etmeyin, şu an eklediğiniz fotoğraflar telefonunuza güvenle kaydediliyor!");
+            }
+        }
+
+        function selectCity(city) {
             currentCity = city;
             if (currentCategory === "gizli") {
                 isSecretUnlocked = false;
@@ -322,14 +363,15 @@
             }
             updateFilterUI();
             renderMemories();
-        };
+        }
 
-        window.selectCategory = function(cat) {
+        function selectCategory(cat) {
             if (cat === "gizli" && !isSecretUnlocked) {
                 document.getElementById("secretPassInput").value = "";
                 document.getElementById("passError").classList.add("hidden");
-                document.getElementById("passwordModal").classList.remove("hidden");
-                document.getElementById("passwordModal").classList.add("flex");
+                var modal = document.getElementById("passwordModal");
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
                 return;
             }
             if (cat !== "gizli") {
@@ -338,10 +380,10 @@
             currentCategory = cat;
             updateFilterUI();
             renderMemories();
-        };
+        }
 
-        window.verifySecretPassword = function() {
-            const val = document.getElementById("secretPassInput").value.trim();
+        function verifySecretPassword() {
+            var val = document.getElementById("secretPassInput").value.trim();
             if (val === SECRET_PIN) {
                 isSecretUnlocked = true;
                 currentCategory = "gizli";
@@ -351,43 +393,46 @@
             } else {
                 document.getElementById("passError").classList.remove("hidden");
             }
-        };
+        }
 
-        window.closePasswordModal = function() {
-            document.getElementById("passwordModal").classList.add("hidden");
-            document.getElementById("passwordModal").classList.remove("flex");
-        };
+        function closePasswordModal() {
+            var modal = document.getElementById("passwordModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
 
         function updateFilterUI() {
-            document.querySelectorAll(".city-btn").forEach(btn => {
-                btn.className = "city-btn py-2.5 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 text-[#7d685e] hover:text-[#5c4338]";
-            });
-            const activeCityBtn = document.getElementById(`city-${currentCity}`);
+            var cityBtns = document.querySelectorAll(".city-btn");
+            for (var i = 0; i < cityBtns.length; i++) {
+                cityBtns[i].className = "city-btn py-2.5 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 text-[#7d685e]";
+            }
+            var activeCityBtn = document.getElementById("city-" + currentCity);
             if (activeCityBtn) {
                 activeCityBtn.className = "city-btn py-2.5 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 bg-white text-[#5c4338] shadow-sm";
             }
 
-            document.querySelectorAll(".cat-btn").forEach(btn => {
-                if (btn.dataset.cat === currentCategory) {
-                    btn.className = "cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-[#5c4338] text-white shadow-sm";
+            var catBtns = document.querySelectorAll(".cat-btn");
+            for (var j = 0; j < catBtns.length; j++) {
+                if (catBtns[j].getAttribute("data-cat") === currentCategory) {
+                    catBtns[j].className = "cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-[#5c4338] text-white shadow-sm";
                 } else {
-                    btn.className = "cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]";
+                    catBtns[j].className = "cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-[#6e5a50] border border-[#e5d5cc]";
                 }
-            });
+            }
 
-            document.getElementById("activeFilterTitle").textContent = `${cityNames[currentCity]} • ${categoryNames[currentCategory]}`;
+            document.getElementById("activeFilterTitle").textContent = cityNames[currentCity] + " • " + categoryNames[currentCategory];
         }
 
         function compressImage(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement("canvas");
-                        const MAX_SIZE = 1000;
-                        let width = img.width;
-                        let height = img.height;
+            return new Promise(function(resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = new Image();
+                    img.onload = function() {
+                        var canvas = document.createElement("canvas");
+                        var MAX_SIZE = 900;
+                        var width = img.width;
+                        var height = img.height;
                         if (width > height && width > MAX_SIZE) {
                             height *= MAX_SIZE / width;
                             width = MAX_SIZE;
@@ -397,9 +442,9 @@
                         }
                         canvas.width = width;
                         canvas.height = height;
-                        const ctx = canvas.getContext("2d");
+                        var ctx = canvas.getContext("2d");
                         ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL("image/jpeg", 0.72));
+                        resolve(canvas.toDataURL("image/jpeg", 0.7));
                     };
                     img.onerror = reject;
                     img.src = e.target.result;
@@ -409,23 +454,30 @@
             });
         }
 
-        window.saveMemory = async function(e) {
+        async function saveMemory(e) {
             e.preventDefault();
-            const submitBtn = document.getElementById("submitMemoryBtn");
-            const file = document.getElementById("mediaInput").files[0];
+            var submitBtn = document.getElementById("submitMemoryBtn");
+            var fileInput = document.getElementById("mediaInput");
+            var file = fileInput.files[0];
             if (!file) return;
 
             submitBtn.disabled = true;
             submitBtn.textContent = "Yükleniyor... ⏳";
 
             try {
-                const isVideo = file.type.startsWith("video/");
-                let mediaDataUrl = "";
+                var isVideo = file.type.indexOf("video/") === 0;
+                var mediaDataUrl = "";
 
                 if (isVideo) {
-                    mediaDataUrl = await new Promise((res, rej) => {
-                        const r = new FileReader();
-                        r.onload = () => res(r.result);
+                    if (file.size > 900000) {
+                        alert("Videolar bulut sınırı nedeniyle en fazla 1 MB olabilir. Lütfen daha kısa bir video veya fotoğraf seçin.");
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = "Kutuya Kaydet 💝";
+                        return;
+                    }
+                    mediaDataUrl = await new Promise(function(res, rej) {
+                        var r = new FileReader();
+                        r.onload = function() { res(r.result); };
                         r.onerror = rej;
                         r.readAsDataURL(file);
                     });
@@ -433,7 +485,7 @@
                     mediaDataUrl = await compressImage(file);
                 }
 
-                const newItem = {
+                var newItem = {
                     title: document.getElementById("titleInput").value.trim(),
                     city: document.getElementById("cityInput").value,
                     category: document.getElementById("categoryInput").value,
@@ -444,7 +496,13 @@
                 };
 
                 if (isCloudActive && db) {
-                    await addDoc(collection(db, "rojin_ferhat_anilar"), newItem);
+                    await db.collection("rojin_ferhat_anilar").add(newItem);
+                } else {
+                    newItem.id = "local_" + Date.now();
+                    memories.unshift(newItem);
+                    try {
+                        localStorage.setItem("rojin_ferhat_backup", JSON.stringify(memories));
+                    } catch (err) {}
                 }
 
                 currentCity = newItem.city;
@@ -457,89 +515,109 @@
                 closeUploadModal();
                 document.getElementById("uploadForm").reset();
             } catch (err) {
-                alert("Dosya yüklenirken bir hata oluştu.");
-                console.error(err);
+                alert("Kaydedilirken bir hata oluştu: " + err.message);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = "Kutuya Kaydet 💝";
             }
-        };
+        }
 
-        window.deleteMemory = async function(id, event) {
-            event.stopPropagation();
+        async function deleteMemory(id, event) {
+            if (event) event.stopPropagation();
             if (!confirm("Bu anıyı silmek istediğinize emin misiniz?")) return;
-            if (isCloudActive && db) {
-                await deleteDoc(doc(db, "rojin_ferhat_anilar", id));
+
+            if (isCloudActive && db && String(id).indexOf("local_") !== 0) {
+                try {
+                    await db.collection("rojin_ferhat_anilar").doc(id).delete();
+                } catch (e) {
+                    alert("Silinemedi: " + e.message);
+                }
+            } else {
+                memories = memories.filter(function(m) { return m.id !== id; });
+                try {
+                    localStorage.setItem("rojin_ferhat_backup", JSON.stringify(memories));
+                } catch (e) {}
+                renderMemories();
             }
-        };
+        }
 
         function renderMemories() {
-            const grid = document.getElementById("memoriesGrid");
-            const filtered = memories.filter(m => m.city === currentCity && m.category === currentCategory);
-            document.getElementById("memoryCountBadge").textContent = `${filtered.length} Anı`;
+            var grid = document.getElementById("memoriesGrid");
+            var filtered = memories.filter(function(m) {
+                return m.city === currentCity && m.category === currentCategory;
+            });
+            document.getElementById("memoryCountBadge").textContent = filtered.length + " Anı";
 
             if (filtered.length === 0) {
-                grid.innerHTML = "";
+                grid.innerHTML = '<div class="col-span-full text-center py-12 text-[#9c857a] text-sm">Henüz bu bölümde bir anı yok. İlk anıyı eklemek için aşağıdaki <b>+ Anı Yükle</b> butonuna dokun! ✨</div>';
                 return;
             }
 
-            grid.innerHTML = filtered.map((item, idx) => {
-                const rot = (idx % 2 === 0 ? -1.5 : 1.5);
-                const mediaHtml = item.mediaType === "video"
-                    ? `<video src="${item.mediaUrl}" class="w-full h-56 object-cover rounded" controls></video>`
-                    : `<img src="${item.mediaUrl}" alt="${item.title}" class="w-full h-56 object-cover rounded">`;
+            grid.innerHTML = filtered.map(function(item, idx) {
+                var rot = (idx % 2 === 0 ? -1.5 : 1.5);
+                var mediaHtml = item.mediaType === "video"
+                    ? '<video src="' + item.mediaUrl + '" class="w-full h-56 object-cover rounded" controls></video>'
+                    : '<img src="' + item.mediaUrl + '" alt="" class="w-full h-56 object-cover rounded">';
 
-                return `
-                    <div onclick="openLightbox('${item.id}')" class="polaroid cursor-pointer" style="transform: rotate(${rot}deg)">
-                        <div class="tape"></div>
-                        <button onclick="deleteMemory('${item.id}', event)" title="Sil" class="absolute top-3 right-3 z-10 bg-black/50 hover:bg-red-600 text-white w-7 h-7 rounded-full text-xs flex items-center justify-center transition">
-                            🗑️
-                        </button>
-                        ${mediaHtml}
-                        <div class="mt-3 text-center">
-                            <p class="handwriting text-2xl text-[#4a3f3a] font-bold leading-tight">${item.title}</p>
-                            <span class="text-[11px] text-[#9c857a] font-medium">${item.date || ""}</span>
-                        </div>
-                    </div>
-                `;
+                return '<div onclick="openLightbox(\'' + item.id + '\')" class="polaroid cursor-pointer" style="transform: rotate(' + rot + 'deg)">' +
+                    '<div class="tape"></div>' +
+                    '<button type="button" onclick="deleteMemory(\'' + item.id + '\', event)" class="absolute top-3 right-3 z-10 bg-black/50 text-white w-7 h-7 rounded-full text-xs flex items-center justify-center">🗑️</button>' +
+                    mediaHtml +
+                    '<div class="mt-3 text-center">' +
+                        '<p class="handwriting text-2xl text-[#4a3f3a] font-bold leading-tight">' + item.title + '</p>' +
+                        '<span class="text-[11px] text-[#9c857a] font-medium">' + (item.date || "") + '</span>' +
+                    '</div>' +
+                '</div>';
             }).join("");
         }
 
-        window.openUploadModal = function() {
+        function openUploadModal() {
             document.getElementById("cityInput").value = currentCity;
             document.getElementById("categoryInput").value = currentCategory;
-            document.getElementById("dateInput").valueAsDate = new Date();
-            document.getElementById("uploadModal").classList.remove("hidden");
-            document.getElementById("uploadModal").classList.add("flex");
-        };
+            try {
+                document.getElementById("dateInput").valueAsDate = new Date();
+            } catch (e) {}
+            var modal = document.getElementById("uploadModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
 
-        window.closeUploadModal = function() {
-            document.getElementById("uploadModal").classList.add("hidden");
-            document.getElementById("uploadModal").classList.remove("flex");
-        };
+        function closeUploadModal() {
+            var modal = document.getElementById("uploadModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
 
-        window.openLightbox = function(id) {
-            const item = memories.find(m => m.id === id);
+        function openLightbox(id) {
+            var item = null;
+            for (var i = 0; i < memories.length; i++) {
+                if (memories[i].id === id) {
+                    item = memories[i];
+                    break;
+                }
+            }
             if (!item) return;
-            const content = document.getElementById("lightboxContent");
+            var content = document.getElementById("lightboxContent");
             content.innerHTML = item.mediaType === "video"
-                ? `<video src="${item.mediaUrl}" controls autoplay class="max-h-[68vh] w-auto"></video>`
-                : `<img src="${item.mediaUrl}" class="max-h-[68vh] w-auto object-contain">`;
+                ? '<video src="' + item.mediaUrl + '" controls autoplay class="max-h-[68vh] w-auto"></video>'
+                : '<img src="' + item.mediaUrl + '" class="max-h-[68vh] w-auto object-contain">';
             document.getElementById("lightboxTitle").textContent = item.title;
             document.getElementById("lightboxDate").textContent = item.date || "";
-            document.getElementById("lightboxModal").classList.remove("hidden");
-            document.getElementById("lightboxModal").classList.add("flex");
-        };
+            var modal = document.getElementById("lightboxModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
 
-        window.closeLightbox = function() {
-            document.getElementById("lightboxModal").classList.add("hidden");
-            document.getElementById("lightboxModal").classList.remove("flex");
+        function closeLightbox() {
+            var modal = document.getElementById("lightboxModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
             document.getElementById("lightboxContent").innerHTML = "";
-        };
+        }
 
-        window.toggleMusic = function() {
-            const audio = document.getElementById("bgMusic");
-            const icon = document.getElementById("vinylIcon");
+        function toggleMusic() {
+            var audio = document.getElementById("bgMusic");
+            var icon = document.getElementById("vinylIcon");
             if (audio.paused) {
                 audio.play();
                 icon.classList.add("vinyl-spin");
@@ -547,17 +625,20 @@
                 audio.pause();
                 icon.classList.remove("vinyl-spin");
             }
-        };
+        }
 
-        window.loadCustomAudio = function(e) {
-            const file = e.target.files[0];
+        function loadCustomAudio(e) {
+            var file = e.target.files[0];
             if (!file) return;
-            const audio = document.getElementById("bgMusic");
+            var audio = document.getElementById("bgMusic");
             audio.src = URL.createObjectURL(file);
             audio.play();
             document.getElementById("vinylIcon").classList.add("vinyl-spin");
             document.getElementById("musicText").textContent = file.name.slice(0, 12) + "...";
-        };
+        }
+
+        // İlk açılışta ekranı çiz
+        renderMemories();
     </script>
 </body>
 </html>
