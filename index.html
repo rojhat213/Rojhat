@@ -282,7 +282,6 @@
             gizli: "🙈 Özel Anlarımız"
         };
 
-        // Önce yerel yedekleri yükle ki ekran hemen açılsın
         function loadLocalBackup() {
             try {
                 var saved = localStorage.getItem("rojin_ferhat_backup");
@@ -295,14 +294,15 @@
 
         loadLocalBackup();
 
-        // Firebase Başlatma
+        // Yeni Bulut Bilgileri (rojhat-15a2f)
         var firebaseConfig = {
-            apiKey: "AIzaSyC5g-LIo2zo1vQZf9yFwPpOA6h6BtTyGik",
-            authDomain: "rojhat-cdcc8.firebaseapp.com",
-            projectId: "rojhat-cdcc8",
-            storageBucket: "rojhat-cdcc8.firebasestorage.app",
-            messagingSenderId: "53049050914",
-            appId: "1:53049050914:web:b6b2bc7c5511ee6ff2077b"
+            apiKey: "AIzaSyDB3xQt4qCFU0_YpPrrB55S8DBOPX2Up60",
+            authDomain: "rojhat-15a2f.firebaseapp.com",
+            projectId: "rojhat-15a2f",
+            storageBucket: "rojhat-15a2f.firebasestorage.app",
+            messagingSenderId: "173665817480",
+            appId: "1:173665817480:web:9e309d8c269acb5f11203d",
+            measurementId: "G-2XX6EWJ87F"
         };
 
         function initCloud() {
@@ -349,9 +349,9 @@
 
         function showCloudStatus() {
             if (isCloudActive) {
-                alert("✅ Rojin & Ferhat ortak bulutu (rojhat-cdcc8) sorunsuz çalışıyor! Yüklediğiniz her anı iki telefonda da anında görünür.");
+                alert("✅ Rojin & Ferhat ortak bulutu (rojhat-15a2f) sorunsuz çalışıyor! Yüklediğiniz her anı iki telefonda da anında görünür.");
             } else {
-                alert("⚠️ Bulut bağlantısı şu an beklemede.\n\nNedeni: Firebase panelinde (rojhat-cdcc8 projesi içinde) sol menüden 'Firestore Database' kısmına girip 'Create database -> Start in test mode' seçeneğini henüz açmamış olabilirsiniz.\n\nTeknik Detay: " + (lastCloudError || "Bağlantı bekleniyor") + "\n\nMerak etmeyin, şu an eklediğiniz fotoğraflar telefonunuza güvenle kaydediliyor!");
+                alert("⚠️ Bulut bağlantısı şu an beklemede.\n\nNedeni: Yeni açtığınız Firebase projesinde (rojhat-15a2f) sol menüden 'Build -> Firestore Database' kısmına girip 'Create database -> Start in test mode' seçeneğini henüz açmamış olabilirsiniz.\n\nTeknik Detay: " + (lastCloudError || "Bağlantı bekleniyor") + "\n\nMerak etmeyin, şu an eklediğiniz fotoğraflar telefonunuza güvenle kaydediliyor!");
             }
         }
 
@@ -637,7 +637,6 @@
             document.getElementById("musicText").textContent = file.name.slice(0, 12) + "...";
         }
 
-        // İlk açılışta ekranı çiz
         renderMemories();
     </script>
 </body>
